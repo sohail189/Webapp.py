@@ -11,29 +11,20 @@ import seaborn as sns
 
 # Set Page Configuration
 st.set_page_config(page_title="Liver and Heart Disease Prediction", layout="wide", page_icon="🏥")
-
-# --- Define Paths to Models and Datasets ---
-# Since files are in the root of the repository, just use their names directly
-HEART_MODEL_FILENAME = 'heart_disease_model (3).sav'
-LIVER_MODEL_FILENAME = 'liver_disease_model (2).sav'
+HEART_MODEL_FILENAME = 'heart_disease_model (2).sav'
+LIVER_MODEL_FILENAME = 'liver_disease_model (1).sav'
 HEART_DATA_FILENAME = 'heart (1).csv'
 LIVER_DATA_FILENAME = 'Liver_disease_data.csv'
 
 # Function to Load Models
 def load_model(model_path):
-    """
-    Loads a pickled machine learning model from a specified relative path.
-    Displays an error if loading fails.
-    """
     try:
         # Before attempting to open, check if the file actually exists
         if not os.path.exists(model_path):
             st.error(f"Error: Model file not found at '{model_path}'. Please ensure it's in the repository root and the name matches exactly.")
             return None
         with open(model_path, 'rb') as file:
-            model = pickle.load(file)
-            # Removed the st.success message for model loading
-            return model
+            return pickle.load(file)
     except Exception as e:
         st.error(f"Error loading model from '{model_path}': {e}")
         return None
@@ -41,7 +32,6 @@ def load_model(model_path):
 # Load heart and liver disease models
 heart_disease_model = load_model(HEART_MODEL_FILENAME)
 liver_disease_model = load_model(LIVER_MODEL_FILENAME)
-
 # --- FUZZY LOGIC SYSTEM ---
 @st.cache_resource
 def setup_fuzzy_system():
