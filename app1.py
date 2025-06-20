@@ -32,7 +32,7 @@ def load_model(model_path):
             return None
         with open(model_path, 'rb') as file:
             model = pickle.load(file)
-            # Removed the st.success message here
+            # Removed the st.success message for model loading
             return model
     except Exception as e:
         st.error(f"Error loading model from '{model_path}': {e}")
@@ -120,16 +120,21 @@ if selected == 'Combined Risk Prediction':
                 fuzzy_simulator.compute()
                 risk_score = fuzzy_simulator.output['risk']
 
-                st.info(f"Heart Disease Probability: **{heart_proba:.2f}%**")
-                st.info(f"Liver Disease Probability: **{liver_proba:.2f}%**")
-                st.warning(f"Combined Risk Score: **{risk_score:.2f}%**")
+                st.subheader("Prediction Results:")
+                st.write(f"Heart Disease Probability: **{heart_proba:.2f}%**")
+                st.write(f"Liver Disease Probability: **{liver_proba:.2f}%**")
+                st.write(f"Combined Risk Score: **{risk_score:.2f}%**")
 
                 if risk_score >= 70:
-                    st.error("High Overall Risk ⚠️")
+                    st.write("Overall Risk: High 🚨")
                 elif risk_score >= 40:
-                    st.warning("Moderate Overall Risk ⚠️")
+                    st.write("Overall Risk: Moderate ⚠️")
                 else:
-                    st.success("Low Overall Risk ✅")
+                    st.write("Overall Risk: Low ✅")
+        except Exception as e:
+            st.error(f"An error occurred during prediction: {e}. "
+                     "Please ensure the models are correctly loaded and inputs match expected format.")
+
 
 elif selected == 'Heart Disease Prediction':
     st.title('Heart Disease Prediction using ML')
@@ -156,17 +161,17 @@ elif selected == 'Heart Disease Prediction':
             try:
                 prediction = heart_disease_model.predict([user_input])
                 result = 'The person has heart disease' if prediction[0] == 1 else 'The person does not have heart disease'
-                st.success(result)
+                st.write(result)
                 probability = heart_disease_model.predict_proba([user_input])[0][1]
                 percentage = round(probability * 100, 2)
                 if probability >= 0.7:
-                    risk_level = "High Risk ⚠️"
+                    risk_level = "High Risk 🚨"
                 elif probability >= 0.4:
                     risk_level = "Moderate Risk ⚠️"
                 else:
                     risk_level = "Low Risk ✅"
-                st.success(f"Probability of Heart Disease: {percentage}%")
-                st.info(f"Risk Level: {risk_level}")
+                st.write(f"Probability of Heart Disease: {percentage}%")
+                st.write(f"Risk Level: {risk_level}")
             except Exception as e:
                 st.error(f"Prediction Error: {e}")
 
@@ -194,17 +199,17 @@ elif selected == 'Liver Disease Prediction':
             try:
                 prediction = liver_disease_model.predict([user_input])
                 result = 'The person has liver disease' if prediction[0] == 1 else 'The person does not have liver disease'
-                st.success(result)
+                st.write(result)
                 probability = liver_disease_model.predict_proba([user_input])[0][1]
                 percentage = round(probability * 100, 2)
                 if probability >= 0.7:
-                    risk_level = "High Risk ⚠️"
+                    risk_level = "High Risk 🚨"
                 elif probability >= 0.4:
                     risk_level = "Moderate Risk ⚠️"
                 else:
                     risk_level = "Low Risk ✅"
-                st.success(f"Probability of Liver Disease: {percentage}%")
-                st.info(f"Risk Level: {risk_level}")
+                st.write(f"Probability of Liver Disease: {percentage}%")
+                st.write(f"Risk Level: {risk_level}")
             except Exception as e:
                 st.error(f"Prediction Error for Liver Disease: {e}")
 
@@ -275,7 +280,6 @@ elif selected == "Plots and Charts":
 elif selected == "Histogram Marker":
     st.title("Histogram Marker Tool")
     dataset_choice = st.selectbox("Select Dataset", ["Heart Disease", "Liver Disease"], key="marker_dataset")
-    # Adjusted paths to use the defined constants
     data_path = HEART_DATA_FILENAME if dataset_choice == "Heart Disease" else LIVER_DATA_FILENAME
     
     if os.path.exists(data_path):
@@ -297,4 +301,5 @@ elif selected == "Histogram Marker":
             st.error(f"Error generating histogram with marker from '{data_path}': {e}")
     else:
         st.error("Dataset not found! Please check the path.")
+
 
