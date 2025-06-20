@@ -9,8 +9,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+# Set Page Configuration
 st.set_page_config(page_title="Liver and Heart Disease Prediction", layout="wide", page_icon="🏥")
 
+# --- Define Paths to Models and Datasets ---
+# Since files are in the root of the repository, just use their names directly
 HEART_MODEL_FILENAME = 'heart_disease_model (2).sav'
 LIVER_MODEL_FILENAME = 'liver_disease_model (1).sav'
 HEART_DATA_FILENAME = 'heart (1).csv'
@@ -18,13 +21,19 @@ LIVER_DATA_FILENAME = 'Liver_disease_data.csv'
 
 # Function to Load Models
 def load_model(model_path):
+    """
+    Loads a pickled machine learning model from a specified relative path.
+    Displays an error if loading fails.
+    """
     try:
         # Before attempting to open, check if the file actually exists
         if not os.path.exists(model_path):
             st.error(f"Error: Model file not found at '{model_path}'. Please ensure it's in the repository root and the name matches exactly.")
             return None
         with open(model_path, 'rb') as file:
-            return pickle.load(file)
+            model = pickle.load(file)
+            # Removed the st.success message here
+            return model
     except Exception as e:
         st.error(f"Error loading model from '{model_path}': {e}")
         return None
@@ -33,9 +42,13 @@ def load_model(model_path):
 heart_disease_model = load_model(HEART_MODEL_FILENAME)
 liver_disease_model = load_model(LIVER_MODEL_FILENAME)
 
-
+# --- FUZZY LOGIC SYSTEM ---
 @st.cache_resource
 def setup_fuzzy_system():
+    """
+    Sets up the fuzzy logic control system for combined risk prediction.
+    Caches the system to avoid re-creation on every rerun.
+    """
     heart_prob = ctrl.Antecedent(np.arange(0, 101, 1), 'heart_prob')
     liver_prob = ctrl.Antecedent(np.arange(0, 101, 1), 'liver_prob')
     risk = ctrl.Consequent(np.arange(0, 101, 1), 'risk')
@@ -56,19 +69,25 @@ def setup_fuzzy_system():
 
 fuzzy_simulator = setup_fuzzy_system()
 
+# --- SIDEBAR ---
 with st.sidebar:
     selected = option_menu(
         'Multiple Disease Prediction System',
-        ['Combined Risk Prediction', 'Heart Disease Prediction', 'Liver Disease Prediction', 
+        ['Combined Risk Prediction', 'Heart Disease Prediction', 'Liver Disease Prediction',
          'Exploratory Data Analysis', 'Plots and Charts', 'Histogram Marker'],
         icons=['heart-pulse', 'heart', 'activity', 'bar-chart-line', 'bar-chart', 'graph-up'],
         menu_icon='hospital-fill',
         default_index=0
     )
 
+# --- Combined Fuzzy Logic Page ---
 if selected == 'Combined Risk Prediction':
     st.title("Heart & Liver Disease Risk Prediction")
+    # Removed the red note st.markdown block from here
     with st.form("fuzzy_input_form"):
+        st.subheader("Enter Patient Details for Combined Risk")
+
+        st.markdown("<h5>Heart Disease Key Inputs (5 features)</h5>", unsafe_allow_html=True)
         col1, col2, col3 = st.columns(3)
         with col1:
             age = st.number_input("Age", 1, 120, 30)
@@ -192,74 +211,90 @@ elif selected == 'Liver Disease Prediction':
 elif selected == "Exploratory Data Analysis":
     st.title("Exploratory Data Analysis")
     dataset_choice = st.selectbox("Select Dataset", ["Heart Disease", "Liver Disease"])
-    data_path = (r'C:\Users\Sohail\Desktop\final project\heart (1).csv' if dataset_choice == "Heart Disease" else r'C:\Users\Sohail\Desktop\final project\Liver_disease_data.csv')
+    # Adjusted paths to use the defined constants
+    data_path = HEART_DATA_FILENAME if dataset_choice == "Heart Disease" else LIVER_DATA_FILENAME
+    
     if os.path.exists(data_path):
-        data = pd.read_csv(data_path)
-        st.write("### Data Preview:")
-        st.dataframe(data.head())
-        st.write("### Summary Statistics:")
-        st.write(data.describe())
-        st.write("### Missing Values:")
-        st.write(data.isnull().sum())
+        try:
+            data = pd.read_csv(data_path)
+            st.write("### Data Preview:")
+            st.dataframe(data.head())
+            st.write("### Summary Statistics:")
+            st.write(data.describe())
+            st.write("### Missing Values:")
+            st.write(data.isnull().sum())
+        except Exception as e:
+            st.error(f"Error loading or processing data from '{data_path}': {e}")
     else:
         st.error("Dataset not found! Please check the path: " + data_path)
 
 elif selected == "Plots and Charts":
     st.title("Plots and Charts")
     dataset_choice = st.selectbox("Select Dataset", ["Heart Disease", "Liver Disease"])
-    data_path = (r'C:\Users\Sohail\Desktop\final project\heart (1).csv' if dataset_choice == "Heart Disease" else r'C:\Users\Sohail\Desktop\final project\Liver_disease_data.csv')
+    # Adjusted paths to use the defined constants
+    data_path = HEART_DATA_FILENAME if dataset_choice == "Heart Disease" else LIVER_DATA_FILENAME
+    
     if os.path.exists(data_path):
-        data = pd.read_csv(data_path)
-        numeric_cols = data.select_dtypes(include=['int64', 'float64']).columns.tolist()
-        if numeric_cols:
-            st.write("### Histogram")
-            selected_hist_col = st.selectbox("Select column for Histogram", numeric_cols, key='hist_col')
-            fig, ax = plt.subplots(figsize=(8, 6))
-            sns.histplot(data[selected_hist_col], kde=True, bins=30, ax=ax)
-            ax.set_title(f'Histogram of {selected_hist_col}')
-            st.pyplot(fig)
+        try:
+            data = pd.read_csv(data_path)
+            numeric_cols = data.select_dtypes(include=['int64', 'float64']).columns.tolist()
+            if numeric_cols:
+                st.write("### Histogram")
+                selected_hist_col = st.selectbox("Select column for Histogram", numeric_cols, key='hist_col')
+                fig, ax = plt.subplots(figsize=(8, 6))
+                sns.histplot(data[selected_hist_col], kde=True, bins=30, ax=ax)
+                ax.set_title(f'Histogram of {selected_hist_col}')
+                st.pyplot(fig)
 
-            st.write("### Correlation Heatmap")
-            fig, ax = plt.subplots(figsize=(10, 6))
-            sns.heatmap(data.corr(numeric_only=True), annot=True, cmap='coolwarm', fmt='.2f', ax=ax)
-            st.pyplot(fig)
+                st.write("### Correlation Heatmap")
+                fig, ax = plt.subplots(figsize=(10, 6))
+                sns.heatmap(data.corr(numeric_only=True), annot=True, cmap='coolwarm', fmt='.2f', ax=ax)
+                st.pyplot(fig)
 
-            st.write("### Line Plot")
-            x_axis = st.selectbox("Select X-axis", numeric_cols, key='line_x')
-            y_axis = st.selectbox("Select Y-axis", numeric_cols, key='line_y')
-            fig, ax = plt.subplots(figsize=(8, 6))
-            sns.lineplot(x=data[x_axis], y=data[y_axis], marker='o', ax=ax)
-            ax.set_title(f'Line Plot of {y_axis} vs {x_axis}')
-            st.pyplot(fig)
+                st.write("### Line Plot")
+                x_axis = st.selectbox("Select X-axis", numeric_cols, key='line_x')
+                y_axis = st.selectbox("Select Y-axis", numeric_cols, key='line_y')
+                fig, ax = plt.subplots(figsize=(8, 6))
+                sns.lineplot(x=data[x_axis], y=data[y_axis], marker='o', ax=ax)
+                ax.set_title(f'Line Plot of {y_axis} vs {x_axis}')
+                st.pyplot(fig)
 
-            st.write("### Box Plot")
-            selected_box_col = st.selectbox("Select column for Box Plot", numeric_cols, key='box_col')
-            fig, ax = plt.subplots(figsize=(8, 6))
-            sns.boxplot(x=data[selected_box_col], ax=ax)
-            ax.set_title(f'Box Plot of {selected_box_col}')
-            st.pyplot(fig)
-        else:
-            st.warning("No numeric columns found in dataset.")
+                st.write("### Box Plot")
+                selected_box_col = st.selectbox("Select column for Box Plot", numeric_cols, key='box_col')
+                fig, ax = plt.subplots(figsize=(8, 6))
+                sns.boxplot(x=data[selected_box_col], ax=ax)
+                ax.set_title(f'Box Plot of {selected_box_col}')
+                st.pyplot(fig)
+            else:
+                st.warning("No numeric columns found in dataset.")
+        except Exception as e:
+            st.error(f"Error generating plots or charts from '{data_path}': {e}")
     else:
         st.error("Dataset not found! Please check the path: " + data_path)
 
 elif selected == "Histogram Marker":
     st.title("Histogram Marker Tool")
     dataset_choice = st.selectbox("Select Dataset", ["Heart Disease", "Liver Disease"], key="marker_dataset")
-    data_path = (r'C:\Users\Sohail\Desktop\final project\heart (1).csv' if dataset_choice == "Heart Disease" else r'C:\Users\Sohail\Desktop\final project\Liver_disease_data.csv')
+    # Adjusted paths to use the defined constants
+    data_path = HEART_DATA_FILENAME if dataset_choice == "Heart Disease" else LIVER_DATA_FILENAME
+    
     if os.path.exists(data_path):
-        data = pd.read_csv(data_path)
-        numeric_cols = data.select_dtypes(include=['int64', 'float64']).columns.tolist()
-        if numeric_cols:
-            selected_col = st.selectbox("Select Column for Histogram", numeric_cols)
-            marker_value = st.number_input(f"Enter a value to mark on the histogram of {selected_col}", value=float(data[selected_col].mean()))
-            fig, ax = plt.subplots(figsize=(10, 6))
-            sns.histplot(data[selected_col], bins=30, kde=True, ax=ax)
-            ax.axvline(marker_value, color='red', linestyle='--', linewidth=2, label=f'Marked Value: {marker_value}')
-            ax.set_title(f"Histogram of {selected_col} with Marker")
-            ax.legend()
-            st.pyplot(fig)
-        else:
-            st.warning("No numeric columns found in dataset.")
+        try:
+            data = pd.read_csv(data_path)
+            numeric_cols = data.select_dtypes(include=['int64', 'float64']).columns.tolist()
+            if numeric_cols:
+                selected_col = st.selectbox("Select Column for Histogram", numeric_cols)
+                marker_value = st.number_input(f"Enter a value to mark on the histogram of {selected_col}", value=float(data[selected_col].mean()))
+                fig, ax = plt.subplots(figsize=(10, 6))
+                sns.histplot(data[selected_col], bins=30, kde=True, ax=ax)
+                ax.axvline(marker_value, color='red', linestyle='--', linewidth=2, label=f'Marked Value: {marker_value}')
+                ax.set_title(f"Histogram of {selected_col} with Marker")
+                ax.legend()
+                st.pyplot(fig)
+            else:
+                st.warning("No numeric columns found in dataset.")
+        except Exception as e:
+            st.error(f"Error generating histogram with marker from '{data_path}': {e}")
     else:
         st.error("Dataset not found! Please check the path.")
+
