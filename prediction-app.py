@@ -9,9 +9,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# --- PAGE CONFIGURATION ---
 st.set_page_config(page_title="Liver and Heart Disease Prediction", layout="wide", page_icon="🏥")
-# --- Function to Load Models ---
+
 def load_model(model_path):
     try:
         with open(model_path, 'rb') as file:
@@ -20,10 +19,9 @@ def load_model(model_path):
         st.error(f"Error loading model: {e}")
         return None
 
-# Load heart and liver disease models
 heart_disease_model = load_model('heart_disease_model (3).sav')
 liver_disease_model = load_model('liver_disease_model (2).sav')
-# --- FUZZY LOGIC SYSTEM ---
+
 @st.cache_resource
 def setup_fuzzy_system():
     heart_prob = ctrl.Antecedent(np.arange(0, 101, 1), 'heart_prob')
@@ -46,18 +44,15 @@ def setup_fuzzy_system():
 
 fuzzy_simulator = setup_fuzzy_system()
 
-# --- SIDEBAR ---
 with st.sidebar:
     selected = option_menu(
         'Multiple Disease Prediction System',
-        ['Combined Risk Prediction', 'Heart Disease Prediction', 'Liver Disease Prediction', 
-         'Exploratory Data Analysis', 'Plots and Charts', 'Histogram Marker'],
+        ['Combined Risk Prediction', 'Heart Disease Prediction', 'Liver Disease Prediction', 'Exploratory Data Analysis', 'Plots and Charts', 'Histogram Marker'],
         icons=['heart-pulse', 'heart', 'activity', 'bar-chart-line', 'bar-chart', 'graph-up'],
         menu_icon='hospital-fill',
         default_index=0
     )
 
-# --- Combined Fuzzy Logic Page ---
 if selected == 'Combined Risk Prediction':
     st.title("Heart & Liver Disease Risk Prediction")
     with st.form("fuzzy_input_form"):
@@ -104,7 +99,6 @@ if selected == 'Combined Risk Prediction':
                 else:
                     st.success("Low Overall Risk ✅")
 
-# --- Heart Disease Prediction Page ---
 elif selected == 'Heart Disease Prediction':
     st.title('Heart Disease Prediction using ML')
     col1, col2, col3 = st.columns(3)
@@ -144,7 +138,6 @@ elif selected == 'Heart Disease Prediction':
             except Exception as e:
                 st.error(f"Prediction Error: {e}")
 
-# --- Liver Disease Prediction Page ---
 elif selected == 'Liver Disease Prediction':
     st.title('Liver Disease Prediction using ML')
     col1, col2, col3 = st.columns(3)
@@ -182,11 +175,11 @@ elif selected == 'Liver Disease Prediction':
                 st.info(f"Risk Level: {risk_level}")
             except Exception as e:
                 st.error(f"Prediction Error for Liver Disease: {e}")
-                # Exploratory Data Analysis
+
 elif selected == "Exploratory Data Analysis":
     st.title("Exploratory Data Analysis")
     dataset_choice = st.selectbox("Select Dataset", ["Heart Disease", "Liver Disease"])
-    data_path = (r'C:\Users\Sohail\Desktop\final project\heart (1).csv' if dataset_choice == "Heart Disease" else r'C:\Users\Sohail\Desktop\final project\Liver_disease_data.csv')
+    data_path = ('heart (1).csv' if dataset_choice == "Heart Disease" else 'Liver_disease_data.csv')
 
     if os.path.exists(data_path):
         data = pd.read_csv(data_path)
@@ -198,11 +191,11 @@ elif selected == "Exploratory Data Analysis":
         st.write(data.isnull().sum())
     else:
         st.error("Dataset not found! Please check the path: " + data_path)
-                # Plots and Charts
+
 elif selected == "Plots and Charts":
     st.title("Plots and Charts")
     dataset_choice = st.selectbox("Select Dataset", ["Heart Disease", "Liver Disease"])
-    data_path = (r'C:\Users\Sohail\Desktop\final project\heart (1).csv' if dataset_choice == "Heart Disease" else r'C:\Users\Sohail\Desktop\final project\Liver_disease_data.csv')
+    data_path = ('heart (1).csv' if dataset_choice == "Heart Disease" else 'Liver_disease_data.csv')
 
     if os.path.exists(data_path):
         data = pd.read_csv(data_path)
@@ -240,11 +233,10 @@ elif selected == "Plots and Charts":
     else:
         st.error("Dataset not found! Please check the path: " + data_path)
 
-# Histogram Marker
 elif selected == "Histogram Marker":
     st.title("Histogram Marker Tool")
     dataset_choice = st.selectbox("Select Dataset", ["Heart Disease", "Liver Disease"], key="marker_dataset")
-    data_path = (r'C:\Users\Sohail\Desktop\final project\heart (1).csv' if dataset_choice == "Heart Disease" else r'C:\Users\Sohail\Desktop\final project\Liver_disease_data.csv')
+    data_path = ('heart (1).csv' if dataset_choice == "Heart Disease" else 'Liver_disease_data.csv')
 
     if os.path.exists(data_path):
         data = pd.read_csv(data_path)
@@ -263,4 +255,3 @@ elif selected == "Histogram Marker":
             st.warning("No numeric columns found in dataset.")
     else:
         st.error("Dataset not found! Please check the path.")
-
