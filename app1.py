@@ -87,7 +87,6 @@ if selected == 'Combined Risk Prediction':
     with st.form("fuzzy_input_form"):
         st.subheader("Enter Patient Details for Combined Risk")
 
-        st.markdown("<h5>Heart Disease Key Inputs (5 features)</h5>", unsafe_allow_html=True)
         col1, col2, col3 = st.columns(3)
         with col1:
             age = st.number_input("Age", 1, 120, 30)
