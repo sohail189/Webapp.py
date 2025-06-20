@@ -130,9 +130,6 @@ if selected == 'Combined Risk Prediction':
                     st.write("Overall Risk: Moderate ⚠️")
                 else:
                     st.write("Overall Risk: Low ✅")
-        except Exception as e:
-            st.error(f"An error occurred during prediction: {e}. "
-                     "Please ensure the models are correctly loaded and inputs match expected format.")
 
 
 elif selected == 'Heart Disease Prediction':
