@@ -11,8 +11,8 @@ import seaborn as sns
 
 # Set Page Configuration
 st.set_page_config(page_title="Liver and Heart Disease Prediction", layout="wide", page_icon="🏥")
-HEART_MODEL_FILENAME = 'heart_disease_model (2).sav'
-LIVER_MODEL_FILENAME = 'liver_disease_model (1).sav'
+HEART_MODEL_FILENAME = 'heart_disease_model (3).sav'
+LIVER_MODEL_FILENAME = 'liver_disease_model (2).sav'
 HEART_DATA_FILENAME = 'heart (1).csv'
 LIVER_DATA_FILENAME = 'Liver_disease_data.csv'
 
