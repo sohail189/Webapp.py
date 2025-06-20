@@ -11,7 +11,6 @@ import seaborn as sns
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(page_title="Liver and Heart Disease Prediction", layout="wide", page_icon="🏥")
-
 # --- Function to Load Models ---
 def load_model(model_path):
     try:
@@ -22,9 +21,8 @@ def load_model(model_path):
         return None
 
 # Load heart and liver disease models
-heart_disease_model = load_model(r'C:\Users\Sohail\Desktop\final project\heart_disease_model (3).sav')
-liver_disease_model = load_model(r'C:\Users\Sohail\Desktop\final project\liver_disease_model (2).sav')
-
+heart_disease_model = load_model('heart_disease_model (3).sav')
+liver_disease_model = load_model('liver_disease_model (2).sav')
 # --- FUZZY LOGIC SYSTEM ---
 @st.cache_resource
 def setup_fuzzy_system():
